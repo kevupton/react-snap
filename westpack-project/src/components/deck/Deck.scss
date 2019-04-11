@@ -1,0 +1,20 @@
+.deck {
+  position: relative;
+  width: 200px;
+  height: 600px;
+  display: inline-block;
+}
+
+.card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 600px;
+  border-radius: 10px;
+
+  &.hidden {
+    background-color: red;
+  }
+}
+

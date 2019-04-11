@@ -5,23 +5,25 @@ export interface IObservableState {
   [key : string] : Observable<any>;
 }
 
-export const withObservableStream = (
-  state : IObservableState,
-) =>
-  (Component : React.ComponentType) => {
-    return class extends React.Component {
+export function withObservableStream<T, O extends IObservableState = IObservableState> (
+  state : O,
+  defaultState? : any,
+) {
+  return (Component : React.ComponentType) : React.ComponentType<T> => {
+    return class extends React.Component<T, {[key in keyof O] : any}> {
+      public state = defaultState;
       private readonly subscription = new Subscription();
 
-      componentDidMount () {
+      public componentDidMount () {
         Object.keys(state)
           .forEach(key => this.subscribeToUpdates(key));
       }
 
-      componentWillUnmount () {
+      public componentWillUnmount () {
         this.subscription.unsubscribe();
       }
 
-      render () {
+      public render () {
         return (
           <Component { ...this.props } { ...this.state } />
         );
@@ -32,3 +34,5 @@ export const withObservableStream = (
       }
     };
   };
+
+}

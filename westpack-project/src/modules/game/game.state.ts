@@ -1,14 +1,14 @@
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-enum House {
+export enum Suite {
   CLUBS,
   HEARTS,
   SPADES,
   DIAMONDS,
 }
 
-enum CardNumber {
+export enum CardNumber {
   ACE,
   TWO,
   THREE,
@@ -24,14 +24,15 @@ enum CardNumber {
   KING,
 }
 
-enum GameStatus {
+export enum GameStatus {
   READY,
   STARTED,
   WIN,
-  LOSE
+  LOSE,
+  INITIALIZING
 }
 
-interface IGameData {
+export interface IGameData {
   computerHand : ICard[];
   playerHand : ICard[];
   pile : ICard[];
@@ -39,9 +40,9 @@ interface IGameData {
   gameStatus : GameStatus;
 }
 
-interface ICard {
-  house : House;
-  cardNumber : CardNumber;
+export interface ICard {
+  suite : Suite;
+  number : CardNumber;
 }
 
 const INITIAL_GAME_DATA : IGameData = {
@@ -54,6 +55,7 @@ const INITIAL_GAME_DATA : IGameData = {
 
 class GameState {
   private readonly gameDataSubject = new BehaviorSubject<IGameData>(INITIAL_GAME_DATA);
+  private readonly cardDeck        = this.generateDeck();
 
   get playerHand$ () {
     return this.getKey$('playerHand');
@@ -90,9 +92,23 @@ class GameState {
     this.gameDataSubject.next(INITIAL_GAME_DATA); // TODO dont change the reaction time property
   }
 
+  public setup () {
+    const shuffledDeck = this.shuffleDeck();
+
+    const playerHand   = shuffledDeck.splice(0, this.cardDeck.length / 2);
+    const computerHand = shuffledDeck;
+
+    this.gameDataSubject.next({
+      ...INITIAL_GAME_DATA,
+      playerHand,
+      computerHand,
+      gameStatus: GameStatus.READY,
+    });
+  }
+
   private getKey$ (key : keyof IGameData) {
     return this.gameDataSubject.pipe(
-      map(data => data.playerHand),
+      map(data => data[key]),
       distinctUntilChanged(),
     );
   }
@@ -118,6 +134,56 @@ class GameState {
     });
 
     return of(card);
+  }
+
+  private shuffleDeck () {
+    // map to an array of 0...52
+    const indexes  = Array.from(Array(this.cardDeck.length))
+      .map((value, i) => i);
+    const shuffled = [];
+
+    while (indexes.length > 0) {
+      const randomIndex     = Math.floor(Math.random() * indexes.length); // floor because it is the indexes
+      const randomCardIndex = indexes.splice(randomIndex, 1)[0];
+      const randomCard      = this.cardDeck[randomCardIndex];
+
+      shuffled.push(randomCard);
+    }
+
+    return shuffled;
+  }
+
+  private generateDeck () : ICard[] {
+    const numbers : CardNumber[] = [
+      CardNumber.ACE,
+      CardNumber.TWO,
+      CardNumber.THREE,
+      CardNumber.FOUR,
+      CardNumber.FIVE,
+      CardNumber.SIX,
+      CardNumber.SEVEN,
+      CardNumber.EIGHT,
+      CardNumber.NINE,
+      CardNumber.TEN,
+      CardNumber.JACK,
+      CardNumber.QUEEN,
+      CardNumber.KING,
+    ];
+
+    const suites : Suite[] = [
+      Suite.CLUBS,
+      Suite.DIAMONDS,
+      Suite.HEARTS,
+      Suite.SPADES,
+    ];
+
+    const cardsArray = (suites.map(suite =>
+      numbers.map(number => (<ICard>{
+        number,
+        suite,
+      }))));
+
+    return (<ICard[]>[]).concat(...cardsArray);
   }
 }
 

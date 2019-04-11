@@ -1,18 +1,24 @@
+import { FunctionComponent } from 'react';
 import * as React from 'react';
 import './App.scss';
+import { CenterDeck, ComputerDeck, PlayerDeck } from './components/deck/Deck';
+import { withObservableStream } from './lib/observable-stream';
+import { gameState, GameStatus } from './modules/game/game.state';
 
-import logo from './logo.svg';
+interface IAppState {
+  status : GameStatus;
+}
 
-const App = () => (
+const App : FunctionComponent<IAppState> = ({ status = GameStatus.INITIALIZING } : IAppState) => (
   <div className="App">
-    <header className="App-header">
-      <img src={ logo } className="App-logo" alt="logo"/>
-      <h1 className="App-title">Welcome to React</h1>
-    </header>
-    <p className="App-intro">
-      To get started, edit <code>src/App.tsx</code> and save to reload.
-    </p>
+    <PlayerDeck hidden={ true }/>
+    <CenterDeck/>
+    <ComputerDeck hidden={ true }/>
+
+    { status === GameStatus.READY && (
+      <button onClick={ () => gameState.setup() }>Play Game</button>
+    ) }
   </div>
 );
 
-export default App;
+export default withObservableStream({ status: gameState.gameStatus$ })(App);
