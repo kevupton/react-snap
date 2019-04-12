@@ -1,27 +1,31 @@
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
+import * as Clubs from './img/club.png';
+import * as Hearts from './img/heart.png';
+import * as Spades from './img/diamond.png';
+import * as Diamonds from './img/spade.png';
 
 export enum Suite {
-  CLUBS,
-  HEARTS,
-  SPADES,
-  DIAMONDS,
+  CLUBS = Clubs,
+  HEARTS = Hearts,
+  SPADES = Spades,
+  DIAMONDS = Diamonds,
 }
 
 export enum CardNumber {
-  ACE,
-  TWO,
-  THREE,
-  FOUR,
-  FIVE,
-  SIX,
-  SEVEN,
-  EIGHT,
-  NINE,
-  TEN,
-  JACK,
-  QUEEN,
-  KING,
+  ACE = 'A',
+  TWO = '2',
+  THREE = '3',
+  FOUR = '4',
+  FIVE = '5',
+  SIX = '6',
+  SEVEN = '7',
+  EIGHT = '8',
+  NINE = '9',
+  TEN = '10',
+  JACK = 'J',
+  QUEEN = 'Q',
+  KING = 'K',
 }
 
 export enum GameStatus {
@@ -35,9 +39,10 @@ export enum GameStatus {
 export interface IGameData {
   computerHand : ICard[];
   playerHand : ICard[];
-  pile : ICard[];
+  centerPile : ICard[];
   botReactionTime : number;
   gameStatus : GameStatus;
+  round : number;
 }
 
 export interface ICard {
@@ -48,9 +53,10 @@ export interface ICard {
 const INITIAL_GAME_DATA : IGameData = {
   computerHand: [],
   playerHand: [],
-  pile: [],
+  centerPile: [],
   botReactionTime: 2000,
   gameStatus: GameStatus.READY,
+  round: 0,
 };
 
 class GameState {
@@ -66,17 +72,42 @@ class GameState {
   }
 
   get pile$ () {
-    return this.getKey$('pile');
+    return this.getKey$('centerPile');
   }
 
   get gameStatus$ () {
     return this.getKey$('gameStatus');
   }
 
+  get round$ () {
+    return this.getKey$('round');
+  }
+
   updateReactionTime (milliseconds : number) {
     this.gameDataSubject.next({
       ...this.gameDataSubject.value,
       botReactionTime: milliseconds,
+    });
+  }
+
+  snapCards () {
+    const gameData       = this.gameDataSubject.value;
+    const { centerPile } = gameData;
+
+    if (!centerPile.length) {
+      return;
+    }
+
+    const isWin                              = centerPile.length >= 2 && centerPile[0].number === centerPile[1].number;
+    const moveCenterPileTo : keyof IGameData = isWin ? 'computerHand' : 'playerHand';
+
+    this.gameDataSubject.next({
+      ...gameData,
+      centerPile: [],
+      [moveCenterPileTo]: [
+        ...centerPile,
+        ...gameData[moveCenterPileTo],
+      ],
     });
   }
 
@@ -89,20 +120,24 @@ class GameState {
   }
 
   reset () {
-    this.gameDataSubject.next(INITIAL_GAME_DATA); // TODO dont change the reaction time property
+    this.gameDataSubject.next(INITIAL_GAME_DATA);
   }
 
-  public setup () {
+  public startNewGame () {
     const shuffledDeck = this.shuffleDeck();
 
     const playerHand   = shuffledDeck.splice(0, this.cardDeck.length / 2);
     const computerHand = shuffledDeck;
 
+    const { round, botReactionTime } = this.gameDataSubject.value;
+
     this.gameDataSubject.next({
       ...INITIAL_GAME_DATA,
       playerHand,
       computerHand,
-      gameStatus: GameStatus.READY,
+      round: round + 1,
+      botReactionTime,
+      gameStatus: GameStatus.STARTED,
     });
   }
 
@@ -115,21 +150,22 @@ class GameState {
 
   private drawCard$ (key : 'playerHand' | 'computerHand') {
     const gameData = this.gameDataSubject.value;
+    const hand = gameData[key];
 
-    if (!gameData[key].length) {
+    if (!hand.length) {
       return throwError(new Error(`There are no cards left in the ${ key } to draw.`));
     }
 
-    const card    = gameData[key][0];
-    const newPile = [
+    const card    = hand[hand.length - 1];
+    const newCenterPile = [
+      ...gameData.centerPile,
       card,
-      ...gameData.pile,
     ];
-    const newHand = gameData[key].slice(1);
+    const newHand = gameData[key].slice(0, hand.length - 1);
 
     this.gameDataSubject.next({
       ...gameData,
-      pile: newPile,
+      centerPile: newCenterPile,
       [key]: newHand,
     });
 

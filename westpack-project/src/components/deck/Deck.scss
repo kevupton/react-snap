@@ -1,20 +1,44 @@
 .deck {
   position: relative;
+  border: 7px solid white;
+  border-radius: 15px;
   width: 200px;
-  height: 600px;
-  display: inline-block;
+  height: 350px;
+  box-sizing: content-box;
+  transition: 0.3s ease-in-out;
+
+  &.win {
+    border-color: #00f600;
+  }
+
+  &.no-delay .card {
+    animation-delay: unset;
+  }
 }
 
 .card {
+  opacity: 0;
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 200px;
-  height: 600px;
-  border-radius: 10px;
 
-  &.hidden {
-    background-color: red;
+  @for $i from 1 through 52 {
+    &:nth-child(#{$i}) {
+      top: -#{$i}px;
+      left: -#{$i}px;
+      animation: fly-in 300ms #{($i - 1) * 50}ms forwards;
+      transition: 300ms ease-in-out;
+    }
+  }
+}
+
+@keyframes fly-in {
+  from  {
+    transform: translate(-100px, -100px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
   }
 }
 

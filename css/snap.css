@@ -1,7 +1,7 @@
-.spade { background-image: url('../img/spade.png'); }
-.heart { background-image: url('../img/heart.png'); }
-.diamond { background-image: url('../img/diamond.png'); }
-.club { background-image: url('../img/club.png'); }
+.spade { background-image: url('../westpack-project/src/modules/game/img/spade.png'); }
+.heart { background-image: url('../westpack-project/src/modules/game/img/heart.png'); }
+.diamond { background-image: url('../westpack-project/src/modules/game/img/diamond.png'); }
+.club { background-image: url('../westpack-project/src/modules/game/img/club.png'); }
 
 .spade, .heart, .diamond, .club { 
 	height: 40px; width: 40px;

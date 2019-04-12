@@ -1,0 +1,41 @@
+
+.card {
+  width: 200px;
+  height: 350px;
+  border-radius: 10px;
+  $color: rgba(50, 50, 50, 0.4);
+  border-right: 1px solid $color;
+  border-bottom: 1px solid $color;
+  background-color: white;
+  font-size: 26px;
+
+  &.hidden {
+    background: #00C9FF; /* fallback for old browsers */
+    background: radial-gradient(circle at center, #92FE9D, #00C9FF); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  }
+
+  img {
+    width: 60px;
+    height: 60px;
+    display: block;
+  }
+
+  span {
+    padding: 10px;
+  }
+
+  .top-left {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    text-align: left;
+  }
+
+  .bottom-right {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    text-align: right;
+  }
+}
+
