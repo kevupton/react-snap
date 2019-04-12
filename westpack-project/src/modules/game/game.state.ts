@@ -66,7 +66,7 @@ const INITIAL_GAME_DATA : IGameData = {
 
 class GameState {
   private readonly gameDataSubject    = new BehaviorSubject<IGameData>(INITIAL_GAME_DATA);
-  private readonly botReactionSubject = new BehaviorSubject(0);
+  private readonly botReactionSubject = new BehaviorSubject(1000);
 
   private readonly cardDeck = this.generateDeck();
 
@@ -116,7 +116,7 @@ class GameState {
       return;
     }
 
-    const isWin                              = centerPile.length >= 2 && centerPile[0].number === centerPile[1].number;
+    const isWin                              = this.isValidSnap(centerPile);
     const moveCenterPileTo : keyof IGameData = isWin ? 'computerHand' : 'playerHand';
 
     this.gameDataSubject.next({
