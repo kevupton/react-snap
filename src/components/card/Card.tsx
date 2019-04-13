@@ -11,7 +11,7 @@ interface CardProps {
 export const Card : FunctionComponent<CardProps> = ({ hidden = false, card }) => {
   return (
     <div className={ 'card ' + (hidden ? 'hidden' : '') }
-         style={{ transform: 'rotate(' + card.rotation + 'deg)' }}>
+         style={card.rotation ? { transform: 'rotate(' + card.rotation + 'deg)' } : {}}>
       { !hidden && (
         <div>
           <div className='top-left'>
