@@ -1,12 +1,16 @@
 .game-container {
   text-align: center;
-  padding: 50px;
+  padding: 20px 50px;
   display: flex;
   justify-content: center;
 
   .deck {
     margin: 20px;
   }
+}
+
+h1 {
+  text-align: center;
 }
 
 .game-menu {
@@ -24,4 +28,8 @@ button {
   height: 0;
   width: 0;
   overflow: hidden;
+}
+
+.deck.current-turn:nth-child(3) {
+  cursor: pointer;
 }

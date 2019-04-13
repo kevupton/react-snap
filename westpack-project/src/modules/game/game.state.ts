@@ -1,5 +1,14 @@
-import { BehaviorSubject, of, throwError } from 'rxjs';
-import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged, filter, map, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
+import {
+  debounceTime,
+  delay,
+  distinctUntilChanged,
+  distinctUntilKeyChanged,
+  filter,
+  map,
+  shareReplay,
+  switchMap,
+} from 'rxjs/operators';
 import * as Clubs from './img/club.png';
 import * as Spades from './img/diamond.png';
 import * as Hearts from './img/heart.png';
@@ -33,6 +42,7 @@ export enum GameStatus {
   STARTED,
   WIN,
   LOSE,
+  DRAW,
   INITIALIZING
 }
 
@@ -55,6 +65,11 @@ export enum GameTurn {
   COMPUTER,
 }
 
+export interface ISnapEvent {
+  isPlayer : boolean;
+  isWin : boolean;
+}
+
 const INITIAL_GAME_DATA : IGameData = {
   computerHand: [],
   playerHand: [],
@@ -65,59 +80,64 @@ const INITIAL_GAME_DATA : IGameData = {
 };
 
 class GameState {
-  private readonly gameDataSubject    = new BehaviorSubject<IGameData>(INITIAL_GAME_DATA);
-  private readonly botReactionSubject = new BehaviorSubject(1000);
 
-  private readonly cardDeck = this.generateDeck();
+  private readonly gameDataSubject        = new BehaviorSubject<IGameData>(INITIAL_GAME_DATA);
+  private readonly botReactionTimeSubject = new BehaviorSubject(1000);
+  public readonly botReactionTime$        = this.botReactionTimeSubject.asObservable();
+  private readonly snapEventsSubject      = new Subject<ISnapEvent>();
+  public readonly snapEvents$             = this.snapEventsSubject.asObservable();
+  private readonly cardDeck               = this.generateDeck();
 
-  get playerHand$ () {
-    return this.getKey$('playerHand');
-  }
-
-  get computerHand$ () {
-    return this.getKey$('computerHand');
-  }
-
-  get pile$ () {
-    return this.getKey$('centerPile');
-  }
-
-  get gameStatus$ () {
-    return this.getKey$('gameStatus');
-  }
-
-  get round$ () {
-    return this.getKey$('round');
-  }
+  public readonly playerHand$   = this.getKey$('playerHand');
+  public readonly computerHand$ = this.getKey$('computerHand');
+  public readonly pile$         = this.getKey$('centerPile');
+  public readonly gameStatus$   = this.getKey$('gameStatus');
+  public readonly round$        = this.getKey$('round');
+  public readonly turn$         = this.getKey$('turn');
 
   constructor () {
-    this.botReactionSubject
+    this.botReactionTimeSubject
       .pipe(
+        debounceTime(300),
         switchMap((milliseconds) => {
           return this.gameDataSubject.pipe(
-            distinctUntilKeyChanged('turn'),
+            distinctUntilChanged((
+              { round: roundA, turn: turnA },
+              { round: roundB, turn: turnB }, // so that the bot restarts on new game
+              ) => `${ roundA }.${ turnA }` === `${ roundB }.${ turnB }`,
+            ),
             debounceTime(milliseconds),
-            filter(({ gameStatus }) => gameStatus === GameStatus.STARTED),
           );
         }),
+        filter(({ gameStatus }) => gameStatus === GameStatus.STARTED),
       )
       .subscribe((gameData) => this.takeComputerTurn(gameData));
+
+    // win lose event watcher
+    this.gameDataSubject.pipe(
+      filter(({ gameStatus }) => gameStatus === GameStatus.STARTED),
+      distinctUntilKeyChanged('turn'),
+      delay(0),
+    )
+      .subscribe(gameData => this.checkRoundCompletion(gameData));
   }
 
   updateReactionTime (milliseconds : number) {
-    this.botReactionSubject.next(milliseconds);
+    this.botReactionTimeSubject.next(milliseconds);
   }
 
-  snapCards () {
-    const gameData       = this.gameDataSubject.value;
-    const { centerPile } = gameData;
+  snapCards (isPlayer = true) {
+    const gameData                   = this.gameDataSubject.value;
+    const { centerPile, gameStatus } = gameData;
 
-    if (!centerPile.length) {
+    if (centerPile.length < 2 || gameStatus !== GameStatus.STARTED) {
       return;
     }
 
-    const isWin                              = this.isValidSnap(centerPile);
-    const moveCenterPileTo : keyof IGameData = isWin ? 'computerHand' : 'playerHand';
+    const hands : ('computerHand' | 'playerHand')[] = ['computerHand', 'playerHand'];
+
+    const isWin            = this.isValidSnap(centerPile);
+    const moveCenterPileTo = hands[isWin ? +!isPlayer : +isPlayer];
 
     this.gameDataSubject.next({
       ...gameData,
@@ -126,6 +146,11 @@ class GameState {
         ...centerPile,
         ...gameData[moveCenterPileTo],
       ],
+    });
+
+    this.snapEventsSubject.next({
+      isPlayer,
+      isWin,
     });
   }
 
@@ -150,18 +175,24 @@ class GameState {
     const { round } = this.gameDataSubject.value;
 
     this.gameDataSubject.next({
-      ...INITIAL_GAME_DATA,
+      centerPile: [],
       playerHand,
       computerHand,
       round: round + 1,
       gameStatus: GameStatus.STARTED,
+      turn: this.getRandomTurn(),
     });
   }
 
-  private getKey$ (key : keyof IGameData) {
+  private getRandomTurn () {
+    return [GameTurn.COMPUTER, GameTurn.PLAYER][Math.floor(Math.random() * 2)];
+  }
+
+  private getKey$<K extends keyof IGameData> (key : K) : Observable<IGameData[K]> {
     return this.gameDataSubject.pipe(
       map(data => data[key]),
       distinctUntilChanged(),
+      shareReplay(1),
     );
   }
 
@@ -248,7 +279,7 @@ class GameState {
 
   private takeComputerTurn ({ centerPile, turn } : IGameData) {
     if (this.isValidSnap(centerPile)) {
-      this.snapCards();
+      this.snapCards(false);
     }
 
     if (turn === GameTurn.COMPUTER) {
@@ -262,6 +293,32 @@ class GameState {
     }
 
     return centerPile[centerPile.length - 2].number === centerPile[centerPile.length - 1].number;
+  }
+
+  private checkRoundCompletion ({ turn, playerHand, computerHand, centerPile } : IGameData) {
+    // if there is a match we dont want to do anything.
+    if (this.isValidSnap(centerPile)) {
+      return;
+    }
+
+    let outcome : GameStatus;
+    if (playerHand.length === 0 && computerHand.length === 0) {
+      outcome = GameStatus.DRAW;
+    }
+    else if (turn === GameTurn.PLAYER && playerHand.length === 0) {
+      outcome = GameStatus.WIN;
+    }
+    else if (turn === GameTurn.COMPUTER && computerHand.length === 0) {
+      outcome = GameStatus.LOSE;
+    }
+    else {
+      return;
+    }
+
+    this.gameDataSubject.next({
+      ...this.gameDataSubject.value,
+      gameStatus: outcome,
+    });
   }
 }
 

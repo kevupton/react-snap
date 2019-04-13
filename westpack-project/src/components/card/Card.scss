@@ -8,6 +8,7 @@
   border-bottom: 1px solid $color;
   background-color: white;
   font-size: 26px;
+  user-select: none;
 
   &.hidden {
     background: #00C9FF; /* fallback for old browsers */
@@ -18,6 +19,7 @@
     width: 60px;
     height: 60px;
     display: block;
+    pointer-events: none;
   }
 
   span {

@@ -1,3 +1,6 @@
+$winner-colour-1: #89f67d;
+$winner-colour-2: #83f5ff;
+
 .deck {
   position: relative;
   border: 7px solid white;
@@ -5,14 +8,39 @@
   width: 200px;
   height: 350px;
   box-sizing: content-box;
-  transition: 0.3s ease-in-out;
-
-  &.win {
-    border-color: #00f600;
-  }
+  transition: 0.5s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
 
   &.no-delay .card {
     animation-delay: unset;
+  }
+
+  &.current-turn {
+    border-color: rgba(142, 51, 195, 0.6);
+    box-shadow: 0 0 5px 1px rgba(142, 51, 195, 0.6);
+  }
+
+  &.snapped-right {
+    border-color: #00f600;
+    box-shadow: 0 0 5px 1px #00f600;
+  }
+
+  &.snapped-wrong {
+    border-color: #f61529;
+    box-shadow: 0 0 5px 1px #f61529;
+  }
+
+  &.winner {
+    animation: winner 2s 0.5s infinite ease-in-out;
+    border-color: $winner-colour-1;
+  }
+
+  h2 {
+    animation: fade-in 0.5s ease-in-out;
+    opacity: 0.8;
   }
 }
 
@@ -42,3 +70,26 @@
   }
 }
 
+@keyframes winner {
+  0% {
+    border-color: $winner-colour-1;
+  }
+
+  50% {
+    border-color: $winner-colour-2;
+  }
+
+  100% {
+    border-color: $winner-colour-1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
