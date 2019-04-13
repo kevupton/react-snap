@@ -14,7 +14,7 @@ interface MenuState {
 }
 
 const menu : FunctionComponent<MenuProps & MenuState> = (
-  { gameStatus = GameStatus.INITIALIZING },
+  { gameStatus = GameStatus.PENDING },
 ) => {
   return (
     <div className='game-menu'>
@@ -24,7 +24,7 @@ const menu : FunctionComponent<MenuProps & MenuState> = (
         { gameStatus === GameStatus.READY ? 'Play Game' : 'Restart Game' }
       </Button>
 
-      { ![GameStatus.INITIALIZING, GameStatus.READY].includes(gameStatus) && (
+      { ![GameStatus.PENDING, GameStatus.READY].includes(gameStatus) && (
         <Button variant='contained' color='secondary' className="stop-playing-btn" onClick={ () => gameState.reset() }>
           Stop Playing
         </Button>

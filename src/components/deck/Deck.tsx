@@ -9,6 +9,7 @@ import { Card } from '../card/Card';
 import './Deck.scss';
 
 enum DeckStatus {
+  SNAPPABLE     = 'snappable',
   DRAW          = 'draw',
   WINNER        = 'winner',
   UNKNOWN       = '',
@@ -109,14 +110,24 @@ function getStatusFor$ (isPlayer = false) {
 
 const DeckWithRound = withObservableStream({ round: gameState.round$ })(Deck);
 
-export const PlayerDeck   = withObservableStream<DeckProps>({
+export const PlayerDeck = withObservableStream<DeckProps>({
   cards: gameState.playerHand$,
   status: getStatusFor$(true),
 })(DeckWithRound);
+
 export const ComputerDeck = withObservableStream<DeckProps>({
   cards: gameState.computerHand$,
   status: getStatusFor$(false),
 })(DeckWithRound);
-export const CenterDeck   = withObservableStream<DeckProps>({
+
+export const CenterDeck = withObservableStream<DeckProps>({
   cards: gameState.pile$,
+  status: combineLatest(
+    gameState.centerPile$,
+    gameState.gameStatus$,
+  )
+    .pipe(map(([centerPile, status]) => {
+      // make it clickable if the game is running and center pile is clickable
+      return centerPile.length > 1 && status === GameStatus.STARTED ? DeckStatus.SNAPPABLE : DeckStatus.UNKNOWN;
+    })),
 })(DeckWithRound);

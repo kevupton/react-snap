@@ -5,6 +5,14 @@ export interface IObservableState {
   [key : string] : Observable<any>;
 }
 
+/**
+ * Observable Stream maps observables to values,
+ * and passes their values through to the props of the provided component.
+ * This is a wrapper to use RxJS as a state manager.
+ *
+ * @param state
+ * @param defaultState
+ */
 export function withObservableStream<T, O extends IObservableState = IObservableState> (
   state : O,
   defaultState? : any,

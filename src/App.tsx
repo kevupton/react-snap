@@ -1,11 +1,18 @@
 import * as React from 'react';
+import { FunctionComponent } from 'react';
 import './App.scss';
 import { CenterDeck, ComputerDeck, PlayerDeck } from './components/deck/Deck';
 import { Menu } from './components/menu/Menu';
-import { gameState, Suite } from './modules/game/game.state';
+import { withObservableStream } from './lib/observable-stream';
+import { gameState, GameStatus, Suite } from './modules/game/game.state';
+import * as classNames from 'classnames';
 
-const App = () => (
-  <div className="App">
+interface AppState {
+  gameStatus : GameStatus;
+}
+
+const App : FunctionComponent<AppState> = ({ gameStatus = GameStatus.PENDING }) => (
+  <div className={classNames('app', gameStatus)}>
     <div className='preload-images'>
       <img src={ Suite.SPADES.toString() }/>
       <img src={ Suite.CLUBS.toString() }/>
@@ -25,4 +32,4 @@ const App = () => (
   </div>
 );
 
-export default App;
+export default withObservableStream({ gameStatus: gameState.gameStatus$ })(App);

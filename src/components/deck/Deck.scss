@@ -8,7 +8,7 @@ $winner-colour-2: #83f5ff;
   width: 200px;
   height: 350px;
   box-sizing: content-box;
-  transition: 0.5s ease-in-out;
+  transition: 0.2s ease-in-out;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -33,13 +33,19 @@ $winner-colour-2: #83f5ff;
     box-shadow: 0 0 5px 1px #f61529;
   }
 
+  &.snappable:hover {
+    border-color: #f2f6cf;
+    box-shadow: 0 0 5px 1px #f2f6cf;
+  }
+
   &.winner {
-    animation: winner 2s 0.5s infinite ease-in-out;
+    animation: winner 2s 1s infinite ease-in-out;
+    transition-duration: 1s;
     border-color: $winner-colour-1;
   }
 
   h2 {
-    animation: fade-in 0.5s ease-in-out;
+    animation: fade-in 1s ease-in-out;
     opacity: 0.8;
   }
 }
@@ -47,13 +53,13 @@ $winner-colour-2: #83f5ff;
 .card {
   opacity: 0;
   position: absolute;
+  transition: 300ms ease-in-out;
 
   @for $i from 1 through 52 {
     &:nth-child(#{$i}) {
       top: -#{$i}px;
       left: -#{$i}px;
       animation: fly-in 300ms #{($i - 1) * 50}ms forwards;
-      transition: 300ms ease-in-out;
     }
   }
 }
@@ -65,7 +71,6 @@ $winner-colour-2: #83f5ff;
   }
 
   to {
-    transform: translate(0, 0);
     opacity: 1;
   }
 }
