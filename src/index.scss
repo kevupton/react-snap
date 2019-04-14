@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  padding: 0;
+  padding: 30px;
   $color: rgba(174, 194, 210, 0.75);
   background: $color;  /* fallback for old browsers */
   background: -webkit-linear-gradient(to right, #eef2f3, $color);  /* Chrome 10-25, Safari 5.1-6 */
@@ -10,6 +10,7 @@ body {
 }
 
 h1, h2, h3, h4 {
+  margin-top: 5px;
   color: rgba(0, 0, 0, 0.7);
   font-family: 'Permanent Marker', cursive;
 }
