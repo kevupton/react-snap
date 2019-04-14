@@ -438,6 +438,7 @@ class GameState {
         ) => roundA === roundB && gameStatusA === gameStatusB,
       ),
       filter(({ gameStatus }) => gameStatus === GameStatus.DEALING),
+      // wait a specific amount of time for dealing to stop. This will reset if another round happens doing
       switchMap(() => of(null)
         .pipe(delay(DEALING_DURATION))),
     )

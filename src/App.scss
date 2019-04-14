@@ -34,19 +34,20 @@ button {
   cursor: pointer;
 }
 
-.started .deck:nth-child(3) {
+.started, .win, .lose, .draw {
+  .deck:nth-child(3) {
+    /* Only make the player deck clickable if the current-turn is the players */
+    &.current-turn {
+      cursor: pointer;
 
-  /* Only make the player deck clickable if the current-turn is the players */
-  &.current-turn {
-    cursor: pointer;
-
-    &:hover .card:last-child {
-      transform: translate(-10px, -10px);
+      &:hover .card:last-child {
+        transform: translate(-10px, -10px);
+      }
     }
-  }
 
-  .card:last-child {
-    animation: none;
-    opacity: 1;
+    .card:last-child {
+      animation: none;
+      opacity: 1;
+    }
   }
 }
