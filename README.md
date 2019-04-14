@@ -2,6 +2,8 @@
 
 This app is a react Snap game, that used RxJS as state management.
 
+[Test Here](https://kevupton.github.io/react-snap/docs)
+
 ### Run the App:
 
 Yarn:
