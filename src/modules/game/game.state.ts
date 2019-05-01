@@ -437,10 +437,13 @@ class GameState {
         { gameStatus: gameStatusB, round: roundB },
         ) => roundA === roundB && gameStatusA === gameStatusB,
       ),
-      filter(({ gameStatus }) => gameStatus === GameStatus.DEALING),
-      // wait a specific amount of time for dealing to stop. This will reset if another round happens doing
-      switchMap(() => of(null)
-        .pipe(delay(DEALING_DURATION))),
+      switchMap((gameData) => of(gameData)
+        .pipe(
+          // only continue if the GameState is in Dealing state (otherwise just unsubscribe from existing)
+          filter(({ gameStatus }) => gameStatus === GameStatus.DEALING),
+          // wait a specific amount of time for dealing to stop. This will reset if another round happens doing
+          delay(DEALING_DURATION),
+        )),
     )
       .subscribe(() => {
         this.gameDataSubject.next({
