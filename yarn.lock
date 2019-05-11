@@ -7030,10 +7030,10 @@ react@^16.8.6:
     prop-types "^15.6.2"
     scheduler "^0.13.6"
 
-reactive-x-component@^0.2.0-beta.4:
-  version "0.2.0-beta.4"
-  resolved "https://registry.yarnpkg.com/reactive-x-component/-/reactive-x-component-0.2.0-beta.4.tgz#a350670567c049b4e5cdf26e0e3b5118a1d905bf"
-  integrity sha512-s80cVGGfAhLmQMBAFGP58AWVK/W4oA0GbNn+Kdz8CUE73qzhCGw6wcxjBs0NBx7zIUyD2WDpD8NQ1Mp/dqX3DQ==
+reactive-x-component@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/reactive-x-component/-/reactive-x-component-0.2.0.tgz#509eef9dd7ed8a23e0f961ad753f928bc490c351"
+  integrity sha512-F/AFCQpZdgZ2GsiNngOjkKwTUN188CHuc3FG/S0seUNV2bHzT4DKccZcFlErUJdKxhHjhixphAsGCUusbKYkAw==
   dependencies:
     chalk "^2.4.2"
 
