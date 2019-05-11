@@ -1,14 +1,5 @@
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
-import {
-  debounceTime,
-  delay,
-  distinctUntilChanged,
-  distinctUntilKeyChanged,
-  filter,
-  map,
-  shareReplay,
-  switchMap,
-} from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 import * as Clubs from './img/club.png';
 import * as Spades from './img/diamond.png';
 import * as Hearts from './img/heart.png';
@@ -418,8 +409,11 @@ class GameState {
   private registerRoundCompletionChecker () {
     this.gameDataSubject.pipe(
       filter(({ gameStatus }) => gameStatus === GameStatus.STARTED),
-      distinctUntilKeyChanged('turn'),
-      delay(0), // this seems to be for a bug with rxjs. Required otherwise the end game events are reversed. *bug*
+      distinctUntilChanged((a, b) =>
+        // only check if completion if the center pile changes or the turn changes.
+        a.centerPile.length === b.centerPile.length && a.turn === b.turn && a.round === b.round,
+      ),
+      delay(0),
     )
       .subscribe(gameData => this.checkRoundCompletion(gameData));
   }

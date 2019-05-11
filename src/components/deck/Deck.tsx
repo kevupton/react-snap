@@ -1,12 +1,14 @@
 import * as classnames from 'classnames';
 import * as React from 'react';
 import { FunctionComponent } from 'react';
-import { combineLatest, merge, of } from 'rxjs';
+import { logger, LogLevel, ReactiveXComponent } from 'reactive-x-component';
+import { combineLatest, merge, Observable, of } from 'rxjs';
 import { delay, flatMap, map, shareReplay, startWith } from 'rxjs/operators';
-import { withObservableStream } from '../../lib/observable-stream';
 import { gameState, GameStatus, GameTurn, ICard } from '../../modules/game/game.state';
 import { Card } from '../card/Card';
 import './Deck.scss';
+
+logger.logLevel = LogLevel.Debug;
 
 enum DeckStatus {
   SNAPPABLE     = 'snappable',
@@ -18,19 +20,16 @@ enum DeckStatus {
   SNAPPED_WRONG = 'snapped-wrong',
 }
 
-interface DeckState {
+interface DeckProps {
   cards : ICard[];
   round : number;
   status : DeckStatus;
-}
-
-interface DeckProps {
   hidden? : boolean;
   animationDelay? : boolean;
   onClick? : () => any;
 }
 
-const Deck : FunctionComponent<DeckProps & DeckState> = (
+const Deck : FunctionComponent<DeckProps> = (
   {
     cards = [],
     hidden = false,
@@ -84,7 +83,7 @@ const statusObservable$ = combineLatest(
     shareReplay(1),
   );
 
-function getStatusFor$ (isPlayer = false) {
+function getStatusFor$ (isPlayer = false) : Observable<DeckStatus> {
   return statusObservable$
     .pipe(
       map(([status, turn, event]) => {
@@ -108,26 +107,27 @@ function getStatusFor$ (isPlayer = false) {
     );
 }
 
-const DeckWithRound = withObservableStream({ round: gameState.round$ })(Deck);
-
-export const PlayerDeck = withObservableStream<DeckProps>({
+export const PlayerDeck = ReactiveXComponent({
   cards: gameState.playerHand$,
   status: getStatusFor$(true),
-})(DeckWithRound);
+  round: gameState.round$,
+})(Deck, { classDebugName: '<PlayerDeck>' });
 
-export const ComputerDeck = withObservableStream<DeckProps>({
+export const ComputerDeck = ReactiveXComponent({
   cards: gameState.computerHand$,
   status: getStatusFor$(false),
-})(DeckWithRound);
+  round: gameState.round$,
+})(Deck);
 
-export const CenterDeck = withObservableStream<DeckProps>({
+export const CenterDeck = ReactiveXComponent({
   cards: gameState.pile$,
+  round: gameState.round$,
   status: combineLatest(
     gameState.centerPile$,
     gameState.gameStatus$,
   )
-    .pipe(map(([centerPile, status]) => {
+    .pipe(map(([centerPile, status]) : DeckStatus => {
       // make it clickable if the game is running and center pile is clickable
       return centerPile.length > 1 && status === GameStatus.STARTED ? DeckStatus.SNAPPABLE : DeckStatus.UNKNOWN;
     })),
-})(DeckWithRound);
+})(Deck);
