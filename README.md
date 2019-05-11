@@ -2,9 +2,9 @@
 
 This app is a react Snap game, that uses RxJS [reactive-x-component](https://github.com/kevupton/reactive-x-component) as state management.
 
-##[Checkout ReactiveXComponent](https://github.com/kevupton/reactive-x-component)
+## [Checkout ReactiveXComponent](https://github.com/kevupton/reactive-x-component)
 
-##[Demo Here](https://kevupton.github.io/react-snap/build)
+## [Demo Here](https://kevupton.github.io/react-snap/build)
 
 ### Run the App:
 
