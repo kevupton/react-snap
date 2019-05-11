@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { FunctionComponent } from 'react';
 import './App.scss';
+import { ReactiveXComponent } from 'reactive-x-component';
 import { CenterDeck, ComputerDeck, PlayerDeck } from './components/deck/Deck';
 import { Menu } from './components/menu/Menu';
-import { withObservableStream } from './lib/observable-stream';
 import { gameState, GameStatus, Suite } from './modules/game/game.state';
 import * as classNames from 'classnames';
 
@@ -32,4 +32,4 @@ const App : FunctionComponent<AppState> = ({ gameStatus = GameStatus.PENDING }) 
   </div>
 );
 
-export default withObservableStream({ gameStatus: gameState.gameStatus$ })(App);
+export default ReactiveXComponent({ gameStatus: gameState.gameStatus$ })(App);

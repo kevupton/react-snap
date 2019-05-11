@@ -3,19 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^3.9.3",
+    "@material-ui/icons": "^3.0.2",
+    "@material-ui/lab": "^3.0.0-alpha.30",
     "@types/jest": "^24.0.11",
     "@types/node": "^11.13.2",
     "@types/react": "^16.8.13",
     "@types/react-dom": "^16.8.3",
+    "classnames": "^2.2.6",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts-scss-ts": "2.17.1",
+    "reactive-x-component": "^0.2.0-beta.4",
     "rxjs": "^6.4.0",
-    "typescript": "^3.4.2",
-    "@material-ui/core": "^3.9.3",
-    "@material-ui/icons": "^3.0.2",
-    "@material-ui/lab": "^3.0.0-alpha.30",
-    "classnames": "^2.2.6"
+    "typescript": "^3.4.2"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.7"
